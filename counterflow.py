@@ -75,7 +75,7 @@ def main():
         return 1.-np.exp(x[:, 2:])
 
     geom = dde.geometry.geometry_2d.Rectangle([0,0], [1,1])
-    timedomain = dde.geometry.TimeDomain(0, 1.)
+    timedomain = dde.geometry.TimeDomain(0., 10.)
     geomtime = dde.geometry.GeometryXTime(geom, timedomain)
 
     h_inlet = dde.DirichletBC(geomtime, inlet, bc_h_inlet, component=1)
@@ -94,12 +94,12 @@ def main():
         c_inlet, c_outlet, 
         w_x_left, w_x_right,
         w_y_left, w_y_right, ic ], 
-        num_domain=20, num_boundary=9, num_initial=10
+        num_domain=2000, num_boundary=100, num_initial=100, num_test=50000,
     )
-    net = dde.maps.FNN([3] + [40] * 6 + [3], "tanh", "Glorot uniform")
+    net = dde.maps.FNN([3] + [60] * 6 + [3], "tanh", "Glorot uniform")
     model = dde.Model(data, net)
     model.compile( "adam", lr=1e-4 )
-    losshistory, train_state = model.train(epochs=1000, display_every=100)
+    losshistory, train_state = model.train(epochs=80000, display_every=100)
     dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
 if __name__ == "__main__":
