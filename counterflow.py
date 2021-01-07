@@ -33,101 +33,74 @@ def main():
         dtheta_h = tf.gradients(theta_h, x)[0]
         dtheta_c = tf.gradients(theta_c, x)[0]
 
-        dtheta_w_t, dtheta_w_x, dtheta_w_y = dtheta_w[:,0:1], dtheta_w[:,1:2], dtheta_w[:,2:3]
-        dtheta_h_t, dtheta_h_x, dtheta_h_y = dtheta_h[:,0:1], dtheta_h[:,1:2], dtheta_h[:,2:3]
-        dtheta_c_t, dtheta_c_x, dtheta_c_y = dtheta_c[:,0:1], dtheta_c[:,1:2], dtheta_c[:,2:3]
+        dtheta_w_x, dtheta_w_y, dtheta_w_t = dtheta_w[:,0:1], dtheta_w[:,1:2], dtheta_w[:,2:]
+        dtheta_h_x, dtheta_h_t = dtheta_h[:,0:1], dtheta_h[:,2:]
+        dtheta_c_y, dtheta_c_t = dtheta_c[:,1:2], dtheta_c[:,2:]
         
-        dtheta_w_xx, dtheta_w_yy = tf.gradients(dtheta_w_x, x)[0][:, 0:1], tf.gradients(dtheta_w_x, x)[0][:, 1:2]
-        dtheta_h_xx, dtheta_h_yy = tf.gradients(dtheta_h_x, x)[0][:, 0:1], tf.gradients(dtheta_h_x, x)[0][:, 1:2]
-        dtheta_c_xx, dtheta_c_yy = tf.gradients(dtheta_c_x, x)[0][:, 0:1], tf.gradients(dtheta_c_x, x)[0][:, 1:2]
+        dtheta_w_xx, dtheta_w_yy = tf.gradients(dtheta_w_x, x)[0][:, 0:1], tf.gradients(dtheta_w_y, x)[0][:, 1:2]
+        dtheta_h_xx = tf.gradients(dtheta_h_x, x)[0][:, 0:1]
+        dtheta_c_yy = tf.gradients(dtheta_c_y, x)[0][:, 1:2]
 
-        eq_w = dtheta_w_t - theta_h - R*theta_c + (1+R)*theta_w - lambda_h*N_h*dtheta_w_xx - lambda_c*N_c*R*dtheta_w_yy
+        eq_w = dtheta_w_t - theta_h - R*theta_c + (1.+R)*theta_w - lambda_h*N_h*dtheta_w_xx - lambda_c*N_c*R*dtheta_w_yy
         eq_h = V_h*dtheta_h_t - theta_w + theta_h + dtheta_h_x + N_h/Pe_h*dtheta_h_xx
         eq_c = V_c*dtheta_c_t - theta_w + theta_c + dtheta_c_y - N_c/Pe_c*dtheta_c_yy
 
         return [ eq_w, eq_h, eq_c ]
 
     def bc_wx_left(x, on_boundary):
-        return on_boundary and np.isclose(x[1], 0.0)
+        return on_boundary and np.isclose(x[0], 0.0)
 
     def bc_wx_right(x, on_boundary):
-        return on_boundary and np.isclose(x[1], 1.0)
+        return on_boundary and np.isclose(x[0], 1.0)
 
     def bc_wy_left(x, on_boundary):
-        return on_boundary and np.isclose(x[2], 0.0)
-
-    def bc_wy_right(x, on_boundary):
-        return on_boundary and np.isclose(x[2], 1.0)
-        
-    def bc_h_inlet(x, on_boundary):
         return on_boundary and np.isclose(x[1], 0.0)
 
-    def bc_h_outlet(x, on_boundary):
+    def bc_wy_right(x, on_boundary):
         return on_boundary and np.isclose(x[1], 1.0)
+        
+    def bc_h_inlet(x, on_boundary):
+        return on_boundary and np.isclose(x[0], 0.0)
+
+    def bc_h_outlet(x, on_boundary):
+        return on_boundary and np.isclose(x[0], 1.0)
 
     def bc_c_inlet(x, on_boundary):
-        return on_boundary and np.isclose(x[2], 0.0)
+        return on_boundary and np.isclose(x[1], 0.0)
 
     def bc_c_outlet(x, on_boundary):
-        return on_boundary and np.isclose(x[2], 1.0)
+        return on_boundary and np.isclose(x[1], 1.0)
 
     def inlet(x):
-        return 1.-np.exp(x[0])
+        return 1.-np.exp(x[:, 2:])
 
     geom = dde.geometry.geometry_2d.Rectangle([0,0], [1,1])
     timedomain = dde.geometry.TimeDomain(0, 1.)
     geomtime = dde.geometry.GeometryXTime(geom, timedomain)
 
-    h_inlet = dde.DirichletBC(geomtime, inlet, bc_h_inlet)
-    h_outlet = dde.NeumannBC(geomtime, lambda X: 0., bc_h_outlet)
-    c_inlet = dde.DirichletBC(geomtime, lambda X: 0., bc_c_inlet)
-    c_outlet = dde.NeumannBC(geomtime, lambda X: 0., bc_c_outlet)
-    w_x_left = dde.NeumannBC(geomtime, lambda X: 0., bc_wx_left)
-    w_x_right = dde.NeumannBC(geomtime, lambda X: 0., bc_wx_right)
-    w_y_left = dde.NeumannBC(geomtime, lambda X: 0., bc_wy_left)
-    w_y_right = dde.NeumannBC(geomtime, lambda X: 0., bc_wy_right)
+    h_inlet = dde.DirichletBC(geomtime, inlet, bc_h_inlet, component=1)
+    h_outlet = dde.NeumannBC(geomtime, lambda x: 0, bc_h_outlet, component=1)
+    c_inlet = dde.DirichletBC(geomtime, lambda x: 0, bc_c_inlet, component=2)
+    c_outlet = dde.NeumannBC(geomtime, lambda x: 0, bc_c_outlet, component=2)
+    w_x_left = dde.NeumannBC(geomtime, lambda x: 0, bc_wx_left, component=0)
+    w_x_right = dde.NeumannBC(geomtime, lambda x: 0, bc_wx_right, component=0)
+    w_y_left = dde.NeumannBC(geomtime, lambda x: 0, bc_wy_left, component=0)
+    w_y_right = dde.NeumannBC(geomtime, lambda x: 0, bc_wy_right, component=0)
+    ic = dde.IC(geomtime, lambda x: 0, lambda _, on_initial: on_initial)
 
     data = dde.data.TimePDE(
         geomtime, HX,
         [ h_inlet, h_outlet, 
         c_inlet, c_outlet, 
         w_x_left, w_x_right,
-        w_y_left, w_y_right ], 
-        num_domain=10000, num_boundary=5000
+        w_y_left, w_y_right, ic ], 
+        num_domain=20, num_boundary=9, num_initial=10
     )
     net = dde.maps.FNN([3] + [40] * 6 + [3], "tanh", "Glorot uniform")
     model = dde.Model(data, net)
     model.compile( "adam", lr=1e-4 )
-    # model.train(epochs=500000)
-    early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-8, patience=10000)
-    #losshistory, train_state = model.train(epochs=10000, display_every=1000, callbacks=[early_stopping], disregard_previous_best=True)
-    losshistory, train_state = model.train(epochs=10000, display_every=100, callbacks=[early_stopping],
-                 disregard_previous_best=True)
+    losshistory, train_state = model.train(epochs=1000, display_every=100)
     dde.saveplot(losshistory, train_state, issave=True, isplot=True)
-
-    # adaptive residual
-   # model.compile("L-BFGS-B")
-  #  model.train()
-   # X = geom.random_points(100000)
-    #err = 1
-   # while err > 0.005:
-    #    f = model.predict(X, operator=NS)
-     #   err_eq = np.absolute(f)
-      #  err = np.mean(err_eq)
-       # print("Mean residual: %.3e" % (err))
-
-       # x_id = np.argmax(err_eq)
-      #  print("Adding new point:", X[x_id], "\n")
-      #  data.add_anchors(X[x_id])
-      #  early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=2000)
-      #  model.compile("adam", lr=1e-3)
-      #  model.train(
-       #     epochs=50000, disregard_previous_best=True, callbacks=[early_stopping]
-      #  )
-       # model.compile("L-BFGS-B")
-       # losshistory, train_state = model.train()
-   # dde.saveplot(losshistory, train_state, issave=True, isplot=True)
-
 
 if __name__ == "__main__":
     main()
