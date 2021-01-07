@@ -11,4 +11,4 @@ module load cuda
 module load tensorflow
  
 cd "$PBS_O_WORKDIR"
-python lid_driven.py
+python counterflow.py
