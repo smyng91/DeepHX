@@ -1,60 +1,135 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+from tensorflow.keras.backend import set_floatx
+import time
+import deepxde as dde
+import tensorflow as tf
 import numpy as np
 
-import deepxde as dde
-from deepxde.backend import tf
+dde.config.real.set_float64()
 
 def main():
+
+    def HX(x, y, X):
+        """ 
+        dtheta_w_dt = theta_h + R*theta_c - (1+R)*theta_w + lambda_h*N_h*d^2theta_w/dx^2 + lambda_c*N_c*R*d^2theta_w/dy^2
+        V_h*dtheta_h_dt = theta_w - theta_h - dtheta_h_dx + N_h/Pe_h*d^2theta_h/dx^2
+        V_c*dtheta_c_dt = theta_w - theta_c - dtheta_c_dy + N_c/Pe_c*d^2theta_c/dy^2
+        """
+        lambda_h = 1.
+        lambda_c = 1.
+        V_h = 1.
+        V_c = 1.
+        Pe_h = 1.
+        Pe_c = 1.
+        N_h = 1.
+        N_c = 1.
+        R = 1.
         
-    def pde(x, y, theta):
-        #how to declare values for constants r, lambda_a and lambda_b, na and bn, pe_a and pe_b? 
-        tw = y[:, 0:1]
-        ta = y[:, 1:2]
-        tb = y[:, 2:]
+        theta_w, theta_h, theta_c = y[:, 0:1], y[:, 1:2], y[:, 2:3]
 
-        dtw_theta = tf.gradients(tw, theta)[0]
-        dta_theta = tf.gradients(ta, theta)[0]
-        dtb_theta = tf.gradients(tb, theta)[0]
+        dtheta_w = tf.gradients(theta_w, x)[0]
+        dtheta_h = tf.gradients(theta_h, x)[0]
+        dtheta_c = tf.gradients(theta_c, x)[0]
 
-        dtw_x = tf.gradients(tw, x)[0]
-        dtw_y = tf.gradients(tw, x)[1]
-        dta_x = tf.gradients(ta, x)[0]
-        dtb_y = tf.gradients(tb, x)[1]
+        dtheta_w_t, dtheta_w_x, dtheta_w_y = dtheta_w[:,0:1], dtheta_w[:,1:2], dtheta_w[:,2:3]
+        dtheta_h_t, dtheta_h_x, dtheta_h_y = dtheta_h[:,0:1], dtheta_h[:,1:2], dtheta_h[:,2:3]
+        dtheta_c_t, dtheta_c_x, dtheta_c_y = dtheta_c[:,0:1], dtheta_c[:,1:2], dtheta_c[:,2:3]
+        
+        dtheta_w_xx, dtheta_w_yy = tf.gradients(dtheta_w_x, x)[0][:, 0:1], tf.gradients(dtheta_w_x, x)[0][:, 1:2]
+        dtheta_h_xx, dtheta_h_yy = tf.gradients(dtheta_h_x, x)[0][:, 0:1], tf.gradients(dtheta_h_x, x)[0][:, 1:2]
+        dtheta_c_xx, dtheta_c_yy = tf.gradients(dtheta_c_x, x)[0][:, 0:1], tf.gradients(dtheta_c_x, x)[0][:, 1:2]
 
-        dtw_xx = tf.gradients(dtw_x, x)[0][:, 0:1]
-        dtw_yy = tf.gradients(dtw_y, x)[1][:, 0:1]
-        dta_xx = tf.gradients(dta_x, x)[0][:, 0:1]
-        dtb_yy = tf.gradients(dtb_y, x)[1][:, 0:1]
+        eq_w = dtheta_w_t - theta_h - R*theta_c + (1+R)*theta_w - lambda_h*N_h*dtheta_w_xx - lambda_c*N_c*R*dtheta_w_yy
+        eq_h = V_h*dtheta_h_t - theta_w + theta_h + dtheta_h_x + N_h/Pe_h*dtheta_h_xx
+        eq_c = V_c*dtheta_c_t - theta_w + theta_c + dtheta_c_y - N_c/Pe_c*dtheta_c_yy
 
-        return dtw_theta - ta - (r * tb) + ((1+r) * tw) - (lambdaa * na * dtw_xx) - (lambdab * nb * r * dtw_yy), 
-            (va * dta_theta) - tw + ta + dta_x - ((na / pea) * dta_xx), 
-            (vb * dtb_theta) - tw + tb + dtb_y - ((nb / peb) * dtb_yy)
+        return [ eq_w, eq_h, eq_c ]
 
-    def initial_condition(_, on_initial):
-    
-        return on_initial
+    def bc_wx_left(x, on_boundary):
+        return on_boundary and np.isclose(x[1], 0.0)
 
-    geom = dde.geometry.Interval(0, 1)
-    timedomain = dde.geometry.TimeDomain(0, 10.)
+    def bc_wx_right(x, on_boundary):
+        return on_boundary and np.isclose(x[1], 1.0)
+
+    def bc_wy_left(x, on_boundary):
+        return on_boundary and np.isclose(x[2], 0.0)
+
+    def bc_wy_right(x, on_boundary):
+        return on_boundary and np.isclose(x[2], 1.0)
+        
+    def bc_h_inlet(x, on_boundary):
+        return on_boundary and np.isclose(x[1], 0.0)
+
+    def bc_h_outlet(x, on_boundary):
+        return on_boundary and np.isclose(x[1], 1.0)
+
+    def bc_c_inlet(x, on_boundary):
+        return on_boundary and np.isclose(x[2], 0.0)
+
+    def bc_c_outlet(x, on_boundary):
+        return on_boundary and np.isclose(x[2], 1.0)
+
+    def inlet(x):
+        return 1.-np.exp(x[0])
+
+    geom = dde.geometry.geometry_2d.Rectangle([0,0], [1,1])
+    timedomain = dde.geometry.TimeDomain(0, 1.)
     geomtime = dde.geometry.GeometryXTime(geom, timedomain)
-    ic1 = dde.IC(geomtime, lambda _: 0., initial_condition, component=0)
-    ic2 = dde.IC(geomtime, lambda _: 0., initial_condition, component=1)
-    ic3 = dde.IC(geomtime, lambda _: 0., initial_condition, component=2)
 
-    #not sure how to set the boundary conditions
-    bc = dde.DirichletBC(geomtime, lambda x: 0., lambda _, on_boundary: on_boundary)
+    h_inlet = dde.DirichletBC(geomtime, inlet, bc_h_inlet)
+    h_outlet = dde.NeumannBC(geomtime, lambda X: 0., bc_h_outlet)
+    c_inlet = dde.DirichletBC(geomtime, lambda X: 0., bc_c_inlet)
+    c_outlet = dde.NeumannBC(geomtime, lambda X: 0., bc_c_outlet)
+    w_x_left = dde.NeumannBC(geomtime, lambda X: 0., bc_wx_left)
+    w_x_right = dde.NeumannBC(geomtime, lambda X: 0., bc_wx_right)
+    w_y_left = dde.NeumannBC(geomtime, lambda X: 0., bc_wy_left)
+    w_y_right = dde.NeumannBC(geomtime, lambda X: 0., bc_wy_right)
 
-    data = dde.data.TimePDE(geomtime, pde, [bc, [ic1, ic2, ic3]], num_domain=2500, num_boundary=3, num_initial=160)
-    net = dde.maps.FNN([2] + [20] * 3 + [1], "tanh", "Glorot normal")
+    data = dde.data.TimePDE(
+        geomtime, HX,
+        [ h_inlet, h_outlet, 
+        c_inlet, c_outlet, 
+        w_x_left, w_x_right,
+        w_y_left, w_y_right ], 
+        num_domain=10000, num_boundary=5000
+    )
+    net = dde.maps.FNN([3] + [40] * 6 + [3], "tanh", "Glorot uniform")
     model = dde.Model(data, net)
+    model.compile( "adam", lr=1e-4 )
+    # model.train(epochs=500000)
+    early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-8, patience=10000)
+    #losshistory, train_state = model.train(epochs=10000, display_every=1000, callbacks=[early_stopping], disregard_previous_best=True)
+    losshistory, train_state = model.train(epochs=10000, display_every=100, callbacks=[early_stopping],
+                 disregard_previous_best=True)
+    dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
-    model.compile("adam", lr=1.0e-3)
-    model.train(epochs=10000)
-    model.compile("L-BFGS-B")
-    model.train()
+    # adaptive residual
+   # model.compile("L-BFGS-B")
+  #  model.train()
+   # X = geom.random_points(100000)
+    #err = 1
+   # while err > 0.005:
+    #    f = model.predict(X, operator=NS)
+     #   err_eq = np.absolute(f)
+      #  err = np.mean(err_eq)
+       # print("Mean residual: %.3e" % (err))
+
+       # x_id = np.argmax(err_eq)
+      #  print("Adding new point:", X[x_id], "\n")
+      #  data.add_anchors(X[x_id])
+      #  early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=2000)
+      #  model.compile("adam", lr=1e-3)
+      #  model.train(
+       #     epochs=50000, disregard_previous_best=True, callbacks=[early_stopping]
+      #  )
+       # model.compile("L-BFGS-B")
+       # losshistory, train_state = model.train()
+   # dde.saveplot(losshistory, train_state, issave=True, isplot=True)
+
 
 if __name__ == "__main__":
     main()
+
+   
