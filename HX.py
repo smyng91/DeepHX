@@ -100,14 +100,14 @@ def main():
         x_id = np.argmax(err_eq)
         # print("Adding new point:", X[x_id], "\n")
         data.add_anchors(X[x_id])
-        early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=2000)
-        model.compile("adam", lr=1e-3)
+        early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=5000)
+        model.compile("adam", lr=1e-5)
         model.train(
             epochs=10000, disregard_previous_best=True, callbacks=[early_stopping]
         )
         model.compile("L-BFGS-B")
         losshistory, train_state = model.train()
-    dde.saveplot(losshistory, train_state, issave=True, isplot=True)
+    dde.saveplot(losshistory, train_state, issave=True, isplot=False)
 
 if __name__ == "__main__":
     main()

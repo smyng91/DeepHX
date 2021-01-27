@@ -1,5 +1,5 @@
 clear; clc; close all
-% plot 2D CFD data
+% plot HX results
 
 
 sol = importdata('test.dat');
