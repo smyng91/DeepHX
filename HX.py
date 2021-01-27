@@ -98,7 +98,7 @@ def main():
         print("Mean residual: %.3e" % (err))
 
         x_id = np.argmax(err_eq)
-        print("Adding new point:", X[x_id], "\n")
+        # print("Adding new point:", X[x_id], "\n")
         data.add_anchors(X[x_id])
         early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=2000)
         model.compile("adam", lr=1e-3)
