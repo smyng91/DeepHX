@@ -12,7 +12,7 @@ dde.config.real.set_float64()
 def main():
 
     L = 10.
-    tend = 1.
+    tend = 10.
 
     def HX(x, y):
         """ 
@@ -71,7 +71,7 @@ def main():
         [ h_inlet, h_outlet, 
         c_inlet, c_outlet, 
         ic ], 
-        num_domain=1000, num_boundary=10, num_initial=500, num_test=500,
+        num_domain=10000, num_boundary=5000, num_initial=1000, num_test=1000,
     )
     layer_size = [2] + [60] * 5 + [3]
     activation = "tanh"
@@ -95,7 +95,7 @@ def main():
         f = model.predict(X, operator=HX)
         err_eq = np.absolute(f)
         err = np.mean(err_eq)
-        print("Mean residual: %.3e" % (err))
+        # print("Mean residual: %.3e" % (err))
 
         x_id = np.argmax(err_eq)
         # print("Adding new point:", X[x_id], "\n")
