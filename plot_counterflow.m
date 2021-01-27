@@ -17,41 +17,41 @@ plot(data(abs(data(:,2))==n,1),data(abs(data(:,2))==n,3),'-k')
 hold on
 plot(data(abs(data(:,2))==n,1),data(abs(data(:,2))==n,4),'-r')
 plot(data(abs(data(:,2))==n,1),data(abs(data(:,2))==n,5),'-b')
-% 
-% figure(1)
-% subplot(3,1,1)
-% nx = 50 ; nt = 50;
-% [X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
-% z = theta_h;
-% Z =griddata(x,t,z,X,Y) ;
-% [p1,p2] = contourf(X,Y,Z);
-% title('$\theta_h$')
-% hold on
-% colormap jet
-% colorbar;
-% axis equal 
-% 
-% subplot(3,1,2)
-% [X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
-% z = theta_c;
-% Z =griddata(x,t,z,X,Y) ;
-% [p1,p2] = contourf(X,Y,Z);
-% title('$\theta_c$')
-% hold on
-% colormap jet
-% colorbar;
-% axis equal 
-% 
-% subplot(3,1,3)
-% [X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
-% z = theta_w;
-% Z =griddata(x,t,z,X,Y) ;
-% [p1,p2] = contourf(X,Y,Z);
-% title('$\theta_w$')
-% hold on
-% colormap jet
-% colorbar;
-% axis equal 
+
+figure(1)
+subplot(3,1,1)
+nx = 50 ; nt = 50;
+[X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
+z = theta_h;
+Z =griddata(x,t,z,X,Y) ;
+[p1,p2] = contourf(X,Y,Z);
+title('$\theta_h$')
+hold on
+colormap jet
+colorbar;
+axis equal 
+
+subplot(3,1,2)
+[X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
+z = theta_c;
+Z =griddata(x,t,z,X,Y) ;
+[p1,p2] = contourf(X,Y,Z);
+title('$\theta_c$')
+hold on
+colormap jet
+colorbar;
+axis equal 
+
+subplot(3,1,3)
+[X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(t),max(t),nt)) ;
+z = theta_w;
+Z =griddata(x,t,z,X,Y) ;
+[p1,p2] = contourf(X,Y,Z);
+title('$\theta_w$')
+hold on
+colormap jet
+colorbar;
+axis equal 
 
 % 
 % yp = 0.5;
