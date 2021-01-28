@@ -71,7 +71,7 @@ def main():
         [ h_inlet, h_outlet, 
         c_inlet, c_outlet, 
         ic ], 
-        num_domain=10000, num_boundary=5000, num_initial=1000, num_test=1000,
+        num_domain=100000, num_boundary=10000, num_initial=10000, num_test=1000,
     )
     layer_size = [2] + [60] * 5 + [3]
     activation = "tanh"
