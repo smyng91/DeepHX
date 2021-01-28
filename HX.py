@@ -68,9 +68,9 @@ def main():
     layer_size = [2] + [50] * 3 + [3]
     activation = "tanh"
     initializer = "Glorot uniform"
-    net = dde.maps.FNN(layer_size, activation, initializer)
+    # net = dde.maps.FNN(layer_size, activation, initializer)
     # net = dde.maps.ResNet(2,3,50,3, activation, initializer)
-    # net = dde.maps.PFNN(layer_size, activation, initializer)
+    net = dde.maps.PFNN(layer_size, activation, initializer)
     model = dde.Model(data, net)
     model.compile( "adam", lr=1e-5,loss_weights=[0.1,0.1,0.1,100,100,100,100,100] ) 
     
