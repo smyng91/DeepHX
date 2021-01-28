@@ -1,0 +1,32 @@
+Using TensorFlow 2 backend.
+
+Set float to float64
+Warning: 1000 points required, but 1024 points sampled.
+Compiling model...
+Building residual neural network...
+'build' took 0.090455 s
+
+'compile' took 6.865042 s
+
+Initializing variables...
+Training model...
+
+Step      Train loss                                                                          Test loss                                                                           Test metric
+0         [2.65e-01, 1.23e-01, 1.56e-01, 6.95e-01, 8.35e-04, 1.36e-02, 8.78e-03, 1.25e-01]    [3.49e-01, 1.53e-01, 1.56e-01, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+1000      [4.35e-04, 5.83e-04, 2.90e-04, 9.60e-05, 7.69e-05, 3.52e-05, 2.14e-05, 6.79e-05]    [7.22e-04, 7.08e-04, 5.52e-04, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+2000      [1.29e-04, 2.38e-04, 9.49e-05, 2.07e-05, 4.05e-05, 4.87e-06, 9.02e-06, 1.50e-05]    [1.81e-04, 2.88e-04, 1.86e-04, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+3000      [5.25e-05, 1.06e-04, 4.22e-05, 2.95e-06, 2.31e-05, 1.10e-06, 4.81e-06, 4.41e-06]    [6.65e-05, 1.32e-04, 7.94e-05, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+4000      [2.60e-05, 5.55e-05, 2.33e-05, 1.38e-06, 1.32e-05, 5.06e-07, 3.39e-06, 2.67e-06]    [3.47e-05, 6.78e-05, 4.15e-05, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+5000      [1.49e-05, 3.15e-05, 1.47e-05, 1.32e-06, 8.45e-06, 3.84e-07, 2.35e-06, 1.83e-06]    [2.21e-05, 3.78e-05, 2.51e-05, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00, 0.00e+00]    []  
+Epoch 5000: early stopping
+
+Best model at step 5000:
+  train loss: 7.54e-05
+  test loss: 8.50e-05
+  test metric: []
+
+'train' took 58.929268 s
+
+Saving loss history to loss.dat ...
+Saving training data to train.dat ...
+Saving test data to test.dat ...
