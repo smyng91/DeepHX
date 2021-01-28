@@ -71,7 +71,7 @@ def main():
     # net = dde.maps.ResNet(layer_size, activation, initializer)
     net = dde.maps.ResNet(2,3,50,3, activation, initializer)
     model = dde.Model(data, net)
-    model.compile( "adam", lr=1e-4, loss_weights=[1e-6, 1e-6, 1e-6])
+    model.compile( "adam", lr=1e-4)
     
     earlystop = dde.callbacks.EarlyStopping(
         min_delta = 1e-4, patience = 1000
