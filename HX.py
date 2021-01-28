@@ -89,7 +89,7 @@ def main():
     model.compile("L-BFGS-B")
     model.train()
 
-    X = geomtime.random_points(100000)
+    X = geomtime.random_points(10000)
     err = 1
     while err > 0.005:
         f = model.predict(X, operator=HX)
