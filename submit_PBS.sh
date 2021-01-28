@@ -12,3 +12,4 @@ module load tensorflow
  
 cd "$PBS_O_WORKDIR"
 python HX.py
+
