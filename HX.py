@@ -63,21 +63,22 @@ def main():
         [ h_inlet, h_outlet, 
         c_inlet, c_outlet, 
         ic ], 
-        num_domain=5000, num_boundary=5000, num_initial=5000, num_test=1000,
+        num_domain=2000, num_boundary=1000, num_initial=1000, num_test=500,
     )
-    layer_size = [2] + [50] * 5 + [3]
+    layer_size = [2] + [50] * 3 + [3]
     activation = "tanh"
     initializer = "Glorot uniform"
-    # net = dde.maps.ResNet(layer_size, activation, initializer)
-    net = dde.maps.ResNet(2,3,50,3, activation, initializer)
+    net = dde.maps.ResNet(layer_size, activation, initializer)
+    # net = dde.maps.ResNet(2,3,50,3, activation, initializer)
+    # net = dde.maps.PFNN(layer_size, activation, initializer)
     model = dde.Model(data, net)
-    model.compile( "adam", lr=1e-5)
+    model.compile( "adam", lr=1e-5,loss_weights=[0.1,0.1,0.1,100,100,100,100,100] ) 
     
     earlystop = dde.callbacks.EarlyStopping(
         min_delta = 1e-6, patience = 1000
     )
     # variable = dde.callbacks.VariableValue(C, period = 500, filename="variables.dat")
-    losshistory, train_state = model.train(epochs = 100000, callbacks=[earlystop],display_every = 1000)#, callbacks=[checkpointer])
+    losshistory, train_state = model.train(epochs = 50000, callbacks=[earlystop],display_every = 1000)#, callbacks=[checkpointer])
     dde.saveplot(losshistory, train_state, issave = True, isplot=True) 
     
     # losshistory, train_state = model.train(epochs=20000, display_every=1000)
