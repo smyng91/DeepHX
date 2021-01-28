@@ -101,7 +101,7 @@ def main():
         # print("Adding new point:", X[x_id], "\n")
         data.add_anchors(X[x_id])
         early_stopping = dde.callbacks.EarlyStopping(min_delta=1e-4, patience=5000)
-        model.compile("adam", lr=1e-5)
+        model.compile("adam", lr=1e-5, loss_weights=[1e-7, 1e-2, 1])
         model.train(
             epochs=10000, disregard_previous_best=True, callbacks=[early_stopping]
         )
