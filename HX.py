@@ -63,22 +63,22 @@ def main():
         [ h_inlet, h_outlet, 
         c_inlet, c_outlet, 
         ic ], 
-        num_domain=2000, num_boundary=1000, num_initial=1000, num_test=500,
+        num_domain=4000, num_boundary=2000, num_initial=2000, num_test=5000,
     )
-    layer_size = [2] + [10] * 3 + [3]
+    layer_size = [2] + [20] * 3 + [3]
     activation = "tanh"
     initializer = "Glorot uniform"
     # net = dde.maps.FNN(layer_size, activation, initializer)
     # net = dde.maps.ResNet(2,3,50,3, activation, initializer)
-    net = dde.maps.PFNN(layer_size, activation, initializer)
+    net = dde.maps.PFNN(layer_size, activation, initializer, dropout_rate=0.1)
     model = dde.Model(data, net)
-    model.compile( "adam", lr=1e-5,loss_weights=[0.1,0.1,0.1,100,100,100,100,100] ) 
+    model.compile( "adam", lr=1e-5,loss_weights=[0.1,0.1,0.1,1,1,1,1,1] ) 
     
     earlystop = dde.callbacks.EarlyStopping(
-        min_delta = 1e-6, patience = 1000
+        min_delta = 1e-4, patience = 1000
     )
     # variable = dde.callbacks.VariableValue(C, period = 500, filename="variables.dat")
-    losshistory, train_state = model.train(epochs = 50000, callbacks=[earlystop],display_every = 1000)#, callbacks=[checkpointer])
+    losshistory, train_state = model.train(epochs = 100000, callbacks=[earlystop],display_every = 1000)#, callbacks=[checkpointer])
     dde.saveplot(losshistory, train_state, issave = True, isplot=True) 
     
     # losshistory, train_state = model.train(epochs=20000, display_every=1000)
