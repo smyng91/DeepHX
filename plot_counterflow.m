@@ -12,7 +12,7 @@ theta_h = data(:,4);
 theta_c = data(:,5);
 
 figure(2)
-n = 0;
+n = 10;
 plot(data(abs(data(:,2))==n,1),data(abs(data(:,2))==n,3),'-k')
 hold on
 plot(data(abs(data(:,2))==n,1),data(abs(data(:,2))==n,4),'-r')
