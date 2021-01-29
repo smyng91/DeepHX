@@ -65,12 +65,12 @@ def main():
         ic ], 
         num_domain=2000, num_boundary=1000, num_initial=1000, num_test=5000,
     )
-    layer_size = [2] + [20] * 5 + [3]
+    layer_size = [2] + [30] * 5 + [3]
     activation = "tanh"
     initializer = "Glorot uniform"
     # net = dde.maps.FNN(layer_size, activation, initializer)
     # net = dde.maps.ResNet(2,3,50,3, activation, initializer)
-    net = dde.maps.PFNN(layer_size, activation, initializer, dropout_rate=0.2)
+    net = dde.maps.PFNN(layer_size, activation, initializer, dropout_rate=0.1)
     model = dde.Model(data, net)
     model.compile( "adam", lr=1e-5,loss_weights=[0.1,0.1,0.1,1,1,1,1,1] ) 
     
