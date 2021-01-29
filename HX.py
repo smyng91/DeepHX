@@ -65,7 +65,7 @@ def main():
         ic ], 
         num_domain=2000, num_boundary=1000, num_initial=1000, num_test=5000,
     )
-    layer_size = [2] + [30] * 5 + [3]
+    layer_size = [2] + [10] * 5 + [3]
     activation = "tanh"
     initializer = "Glorot uniform"
     # net = dde.maps.FNN(layer_size, activation, initializer)
