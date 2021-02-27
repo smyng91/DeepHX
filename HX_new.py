@@ -49,7 +49,13 @@ x_data, t_data = np.meshgrid(
     np.linspace(0, tau, 100)
 )
 
-h = m.train([x_data, t_data], 11*['zero'], learning_rate=0.001, epochs=5000, batch_size=100, shuffle=True, verbose=1)
+h = m.train([x_data, t_data], 11*['zero'], learning_rate=0.001, epochs=10000, batch_size=100, shuffle=True, verbose=1)
+plt.semilogy(h.history['loss'])
+plt.xlabel('epochs')
+plt.ylabel('loss')
+plt.savefig('loss')
+m.save_weights('trained_HX.hdf5')
+
 
 x_test, t_test = np.meshgrid(
     np.linspace(0, L_hx, 200), 
@@ -60,4 +66,4 @@ pred_theta_c = theta_c.eval(m, [x_test, t_test])
 pred_theta_w = theta_w.eval(m, [x_test, t_test])
 
 sol = [pred_theta_h,pred_theta_c,pred_theta_h]
-np.save('solution.npy',sol)
+np.save('prediction.npy',sol)
