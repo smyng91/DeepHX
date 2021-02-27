@@ -9,6 +9,4 @@
 
 module load horovod
 
-python NavierStokes_2D.py
-
-
+python HX_new.py
