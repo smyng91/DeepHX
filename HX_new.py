@@ -6,7 +6,7 @@ import scipy.io
 from numpy import pi
 from sciann.utils.math import diff, sign, sin
 
-L_hx = 10
+L_hx = 5
 tau = 10
 
 U = 1
@@ -45,11 +45,11 @@ m = sn.SciModel(
     loss_func = 'mse', optimizer = 'Adam')
 
 x_data, t_data = np.meshgrid(
-    np.linspace(0, L_hx, 100), 
-    np.linspace(0, tau, 100)
+    np.linspace(0, L_hx, 200), 
+    np.linspace(0, tau, 200)
 )
 
-h = m.train([x_data, t_data], 11*['zero'], learning_rate=0.001, epochs=10000, batch_size=100, shuffle=True, verbose=1)
+h = m.train([x_data, t_data], 11*['zero'], learning_rate=0.001, epochs=50000, batch_size=100, shuffle=True, adaptive_weights = True, verbose=1)
 plt.semilogy(h.history['loss'])
 plt.xlabel('epochs')
 plt.ylabel('loss')
