@@ -24,7 +24,7 @@ L = 5;          % length
 dx = L/(Ns);
 x = 0:dx:L;
 tau = 10;            % final time
-dt = tau/(Nt);        % time step
+dt = tau/(Nt-1);        % time step
 T0 = 0;             % initial condition
 time = 0:dt:tau;
 
@@ -64,10 +64,11 @@ A = [A11 A12 A13; A21 A22 A23; A31 A32 A33];
 % 3. create boundary vector
 d = zeros(Ns*3,1);
 d(1) = beta_h;
-for i=1:1:Nt+1
+x_f(1,:) = x;
+for i=1:1:Nt
 %     d(1) = beta_h*(1-sin(-0.5*time));
+    sol(:,i) = Tcurr;    
     x_f(i,:) = x;
-    sol(:,i) = Tcurr;        
     d(1) = beta_h;
     Tnext = (A)*Tcurr+d;
     Tcurr = Tnext;
@@ -76,26 +77,24 @@ end
 % add theta_h BC
 sol = [ones(1,width(sol)); sol];
 % add theta_c BC
-sol = [sol(1:Ns+1,:); zeros(1,width(sol)); sol(1*Ns+2:end,:)];
-% add theta_w BC
-sol = [sol(1:2*Ns+3,:); sol(2*Ns+3,:); sol(2*Ns+4:end,:)];
+sol(N
 
-
-theta_h = sol(1:Ns+1,:)';
-theta_c = sol(Ns+2:2*Ns+2,:)';
-theta_w = sol(2*Ns+3:3*Ns+3,:)';
-
-t_f = repmat(time,1,Ns+1); 
-
+% theta_h = sol(1:Ns,:)';
+% theta_c = sol(Ns+1:2*Ns,:)';
+% theta_w = sol(2*Ns+1:3*Ns,:)';
+% 
+% t_f = repmat(time,1,Ns); 
+% 
+% 
 figure(1)
-plot(x,sol(1:Ns+1,Nt),'-r')
+plot(x,sol(1:Ns,Nt),'-r')
 hold on
-plot(x,flipud(sol(Ns+2:2*Ns+2,Nt)),'-b')
+plot(x,sol(Ns+1:2*Ns,Nt),'-b')
 hold on
-plot(x,sol(2*Ns+3:3*Ns+3,Nt))
-
-data = [x_f(:), t_f',theta_w(:),theta_h(:),theta_c(:)];
-dlmwrite('sol_true.dat',sol,'delimiter',' ')
+plot(x,sol(2*Ns+1:3*Ns,Nt))
+% 
+% data = [x_f(:), t_f',theta_w(:),theta_h(:),theta_c(:)];
+% dlmwrite('sol_true.dat',sol,'delimiter',' ')
 
 
 % 
