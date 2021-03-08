@@ -18,15 +18,15 @@ Vh = 1;
 %------------------------------------------------------------------
 % NUMERICAL PARAMETERS
 %------------------------------------------------------------------
-Ns = 30;        % number of space steps
-Nt = 1000;       % number of time steps
-L = 10;          % length
+Ns = 50;        % number of space steps
+Nt = 500;       % number of time steps
+L = 5;          % length
 dx = L/Ns;
-x = dx:dx:L;
+x = 0:dx:L;
 tau = 10;            % final time
 dt = tau/Nt;        % time step
 T0 = 0;             % initial condition
-time = dt:dt:tau;
+time = 0:dt:tau;
 
 
 % coefficients
@@ -64,69 +64,38 @@ A = [A11 A12 A13; A21 A22 A23; A31 A32 A33];
 % 3. create boundary vector
 d = zeros(Ns*3,1);
 d(1) = beta_h;
-% d(Ns+1) = -2*alpha_c+2*beta_c;
-for i=1:1:Nt
+for i=1:1:Nt+1
 %     d(1) = beta_h*(1-sin(-0.5*time));
+    x_f(i,:) = x;
+    sol(:,i) = Tcurr;        
     d(1) = beta_h;
     Tnext = (A)*Tcurr+d;
-    sol(:,i) = Tnext;
     Tcurr = Tnext;
 end
 
-theta_h = sol(1:Ns,:);
-theta_c = sol(Ns+1:2*Ns,:)';
-theta_w = sol(2*Ns+1:3*Ns,:);
+% add theta_h BC
+sol = [ones(1,width(sol)); sol];
+% add theta_c BC
+sol = [sol(1:Ns+1,:); zeros(1,width(sol)); sol(1*Ns+2:end,:)];
+% add theta_w BC
+sol = [sol(1:2*Ns+2,:); sol(2*Ns+3,:); sol(2*Ns+3:end,:)];
 
-% nx = 100; nt = 100;
-% [X,Y] = meshgrid(linspace(min(x),max(x),nx),linspace(min(time),max(time),nt)) ;
-% z = theta_h';
-% Z = griddata(x,time,z,X,Y) ;
-% figure(1)
-% subplot(1,3,1)
-% [p1,p2] = contourf(X,Y,Z);
-% hold on
-% colormap jet
-% axis equal 
-% title('$\theta_h$')
-% xlabel('$x$')
-% ylabel('$\tau$')
-% subplot(1,3,2)
-% z = theta_c';
-% Z = griddata(x,time,z,X,Y) ;
-% [p1,p2] = contourf(X,Y,Z);
-% hold on
-% axis equal 
-% title('$\theta_c$')
-% xlabel('$x$')
-% subplot(1,3,3)
-% z = theta_w';
-% Z = griddata(x,time,z,X,Y) ;
-% [p1,p2] = contourf(X,Y,Z);
-% hold on
-% axis equal 
-% title('$\theta_w$')
-% xlabel('$x$')
 
-% subplot(3,1,1)
-% surf(time,x,Th)
-% xlabel('t (s)')
-% ylabel('x (m)')
-% zlabel('\tau')
-% 
-% subplot(3,1,2)
-% plot(time,dT)
-% xlabel('t (s)')
-% ylabel('\tau_{h,o}-\tau_{c,o}')
-% 
+theta_h = sol(1:Ns+1,:)';
+theta_c = sol(Ns+2:2*Ns+2,:)';
+theta_w = sol(2*Ns+3:3*Ns+3,:)';
+
+t_f = repmat(time,1,Ns+1); 
+
 figure(1)
-plot(x,sol(1:Ns,Nt),'-r')
+plot(x,sol(1:Ns+1,Nt),'-r')
 hold on
-plot(x,sol(Ns+1:2*Ns,Nt),'-b')
+plot(x,flipud(sol(Ns+2:2*Ns+2,Nt)),'-b')
 hold on
-plot(x,sol(2*Ns+1:3*Ns,Nt))
+plot(x,sol(2*Ns+3:3*Ns+3,Nt))
 
-dlmwrite('sol_true.dat',sol,'delimiter',' ')
-
+data = [x_f(:), t_f',theta_w(:),theta_h(:),theta_c(:)];
+dlmwrite('sol_true.dat',data,'delimiter',' ')
 
 
 % 
