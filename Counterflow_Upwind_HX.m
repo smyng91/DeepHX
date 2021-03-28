@@ -11,7 +11,7 @@ set(0,'defaulttextinterpreter','latex')
 %------------------------------------------------------------------
 % HEAT EXCHANGER PARAMETERS
 %------------------------------------------------------------------
-R = 1;
+R = 5;
 Vc = 1;
 Vh = 1;
 
@@ -20,11 +20,11 @@ Vh = 1;
 %------------------------------------------------------------------
 Ns = 50;        % number of space steps
 Nt = 500;       % number of time steps
-L = 5;          % length
-dx = L/(Ns);
+L = 1;          % length
+dx = L/Ns;
 x = 0:dx:L;
-tau = 10;            % final time
-dt = tau/(Nt);        % time step
+tau = 1;            % final time
+dt = tau/Nt;        % time step
 T0 = 0;             % initial condition
 time = 0:dt:tau;
 
@@ -78,11 +78,11 @@ sol = [ones(1,width(sol)); sol];
 % add theta_c BC
 sol = [sol(1:Ns+1,:); zeros(1,width(sol)); sol(1*Ns+2:end,:)];
 % add theta_w BC
-sol = [sol(1:2*Ns+3,:); sol(2*Ns+3,:); sol(2*Ns+4:end,:)];
+sol = [sol(1:2*Ns+2,:); sol(2*Ns+3,:); sol(2*Ns+3:end,:)];
 
 
 theta_h = sol(1:Ns+1,:)';
-theta_c = sol(Ns+2:2*Ns+2,:)';
+theta_c = flipud(sol(Ns+2:2*Ns+2,:))';
 theta_w = sol(2*Ns+3:3*Ns+3,:)';
 
 t_f = repmat(time,1,Ns+1); 
@@ -95,7 +95,7 @@ hold on
 plot(x,sol(2*Ns+3:3*Ns+3,Nt))
 
 data = [x_f(:), t_f',theta_w(:),theta_h(:),theta_c(:)];
-dlmwrite('sol_true.dat',sol,'delimiter',' ')
+dlmwrite('sol_true.dat',data,'delimiter',' ')
 
 
 % 
